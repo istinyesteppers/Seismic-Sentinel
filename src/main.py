@@ -58,5 +58,4 @@ def main():
     print(f"Success. Data ready for Frontend.")
 
 if __name__ == "__main__":
-    main()"""
-
+    main()
