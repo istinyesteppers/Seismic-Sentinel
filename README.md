@@ -35,11 +35,12 @@ This project scrapes raw, unstructured data from the **Kandilli Observatory** (B
     ```
     * This scrapes the latest data, saves `data/quakes.csv`, calculates anomalies, and generates `data/quakes.json` for the frontend.
 
-3.  **Launch the React Dashboard:**
+3. 3.  **Launch the React Dashboard:**
     ```bash
-    python -m http.server 8000
+    python run_dashboard.py
     ```
-    * Open your browser to: `http://localhost:8000/frontend/index.html`
+    * **Automated:** This script starts the local server and **automatically opens** the dashboard in your default web browser.
+    * **Manual Access:** `http://localhost:8000/frontend/index.html`
 
 ### 📊 Data Source
 * **Source:** Kandilli Observatory and Earthquake Research Institute (KOERI).
