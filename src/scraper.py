@@ -7,7 +7,6 @@ into a structured format for analysis.
 """
 
 import os
-from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -56,7 +55,7 @@ def parse_line(line):
         line (str): A raw string containing earthquake data.
 
     Returns:
-        dict: A dictionary containing timestamp, lat, long, depth, magnitude, and location.
+        dict: A dictionary containing timestamp, lat, long, depth, magnitude.
               Returns None if the line is malformed.
     """
     if len(line) < 50:
@@ -73,7 +72,7 @@ def parse_line(line):
         latitude = float(parts[2])
         longitude = float(parts[3])
         depth = float(parts[4])
-        
+
         # Magnitude is usually in the 6th index (ML), replacing empty placeholders
         magnitude_str = parts[6].replace('-.-', '0.0')
         magnitude = float(magnitude_str)
@@ -100,7 +99,7 @@ def update_dataset():
     """
     print("Fetching data from Kandilli Observatory...")
     raw_lines = fetch_quake_data()
-    
+
     clean_data = []
     for line in raw_lines:
         parsed_item = parse_line(line)
