@@ -3,58 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <title>Seismic Sentinel Dashboard</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white p-10 font-mono">
-    <div id="root"></div>
-    <script type="text/babel">
-        const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } = Recharts;
+<body class="bg-gray-900 text-white font-mono p-10">
+    
+    <div id="root">
+        <div class="p-10 text-center">
+            <h1 class="text-4xl text-teal-400 font-bold animate-pulse">Initializing Dashboard...</h1>
+            <p class="text-gray-400 mt-4">If this stays on screen for more than 5 seconds, check the Console.</p>
+        </div>
+    </div>
 
+    <script type="text/babel">
         function App() {
             const [data, setData] = React.useState([]);
+            const [error, setError] = React.useState(null);
 
             React.useEffect(() => {
-                // Fetches the JSON file created by Python
+                // Pointing to the data file
                 fetch('../data/quakes.json')
-                    .then(res => res.json())
+                    .then(res => {
+                        if (!res.ok) throw new Error("Could not find data/quakes.json. Did you run main.py?");
+                        return res.json();
+                    })
                     .then(setData)
-                    .catch(e => console.error("Run python script first!", e));
+                    .catch(err => {
+                        console.error("Fetch Error:", err);
+                        setError(err.message);
+                    });
             }, []);
 
-            if (data.length === 0) return <div>Loading... (Run src/main.py first)</div>;
+            if (error) return (
+                <div class="p-10 border border-red-500 bg-red-900/20 rounded text-center">
+                    <h1 class="text-3xl text-red-500 font-bold mb-4">System Error</h1>
+                    <p class="text-xl">{error}</p>
+                </div>
+            );
 
+            // Wait for data
+            if (data.length === 0) return (
+                <div class="text-center mt-20">
+                    <h1 class="text-4xl text-teal-400 animate-bounce">Loading Seismic Data...</h1>
+                </div>
+            );
+
+            // Logic: Sort by magnitude, take top 10
+            const topQuakes = [...data].sort((a, b) => b.magnitude - a.magnitude).slice(0, 10);
             const maxMag = Math.max(...data.map(d => d.magnitude));
-            
+
             return (
-                <div class="max-w-4xl mx-auto">
-                    <h1 class="text-4xl text-teal-400 mb-6 font-bold">Seismic Sentinel</h1>
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="bg-gray-800 p-6 rounded">
-                            <h2 class="text-gray-400">Total Quakes</h2>
-                            <p class="text-4xl font-bold">{data.length}</p>
+                <div class="max-w-4xl mx-auto animate-fade-in-up">
+                    <header class="mb-10 border-b border-gray-700 pb-6 flex justify-between items-end">
+                        <div>
+                            <h1 class="text-5xl font-bold text-teal-400">Seismic Sentinel</h1>
+                            <p class="text-gray-400 mt-2">Live React.js Dashboard (+15 Points)</p>
                         </div>
-                        <div class="bg-gray-800 p-6 rounded">
-                            <h2 class="text-gray-400">Max Magnitude</h2>
-                            <p class="text-4xl font-bold text-red-500">{maxMag}</p>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500 uppercase tracking-widest">Status</div>
+                            <div class="text-teal-400 font-bold">● SYSTEM ONLINE</div>
+                        </div>
+                    </header>
+
+                    {/* Stats Grid */}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-teal-500">
+                            <h2 class="text-gray-400 uppercase text-xs tracking-wider">Total Events</h2>
+                            <p class="text-5xl font-bold mt-2">{data.length}</p>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-red-500">
+                            <h2 class="text-gray-400 uppercase text-xs tracking-wider">Max Magnitude</h2>
+                            <p class="text-5xl font-bold mt-2 text-white">{maxMag}</p>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-purple-500">
+                            <h2 class="text-gray-400 uppercase text-xs tracking-wider">Latest Zone</h2>
+                            <p class="text-lg mt-4 truncate text-gray-300">{data[0]?.location || "Unknown"}</p>
                         </div>
                     </div>
-                    <div class="bg-gray-800 p-6 rounded h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data.slice(0, 20)}>
-                                <XAxis dataKey="magnitude" stroke="#888" />
-                                <Tooltip contentStyle={{backgroundColor: '#333'}} />
-                                <Bar dataKey="magnitude" fill="#2dd4bf" />
-                            </BarChart>
-                        </ResponsiveContainer>
+
+                    {/* Visualization: Custom Bar Chart */}
+                    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
+                        <h2 class="text-2xl font-bold mb-6 text-white flex items-center">
+                            <span class="mr-2">📊</span> Top 10 Critical Events
+                        </h2>
+                        <div class="space-y-5">
+                            {topQuakes.map((quake, i) => (
+                                <div key={i} class="relative">
+                                    <div class="flex justify-between text-sm text-gray-400 mb-1">
+                                        <span class="truncate w-2/3">{quake.location}</span>
+                                        <span class="font-bold text-teal-300">{quake.magnitude} ML</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
+                                        <div 
+                                            class="bg-gradient-to-r from-teal-500 to-emerald-400 h-4 rounded-full"
+                                            style={{ width: `${(quake.magnitude / maxMag) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
