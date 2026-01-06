@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seismic Sentinel Dashboard</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-10 font-mono">
+    <div id="root"></div>
+    <script type="text/babel">
+        const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } = Recharts;
+
+        function App() {
+            const [data, setData] = React.useState([]);
+
+            React.useEffect(() => {
+                // Fetches the JSON file created by Python
+                fetch('../data/quakes.json')
+                    .then(res => res.json())
+                    .then(setData)
+                    .catch(e => console.error("Run python script first!", e));
+            }, []);
+
+            if (data.length === 0) return <div>Loading... (Run src/main.py first)</div>;
+
+            const maxMag = Math.max(...data.map(d => d.magnitude));
+            
+            return (
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-4xl text-teal-400 mb-6 font-bold">Seismic Sentinel</h1>
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="bg-gray-800 p-6 rounded">
+                            <h2 class="text-gray-400">Total Quakes</h2>
+                            <p class="text-4xl font-bold">{data.length}</p>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded">
+                            <h2 class="text-gray-400">Max Magnitude</h2>
+                            <p class="text-4xl font-bold text-red-500">{maxMag}</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data.slice(0, 20)}>
+                                <XAxis dataKey="magnitude" stroke="#888" />
+                                <Tooltip contentStyle={{backgroundColor: '#333'}} />
+                                <Bar dataKey="magnitude" fill="#2dd4bf" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            );
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
