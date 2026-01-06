@@ -13,26 +13,26 @@ HOST = "localhost"
 def run_server():
     """Starts the HTTP server and opens the default browser."""
     server_address = (HOST, PORT)
-    
+
     try:
         httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
-    except OSError as e:
+    except OSError:
         print(f"Error: Port {PORT} is busy. Try closing other python windows.")
         sys.exit(1)
 
     url = f"http://{HOST}:{PORT}/frontend/index.html"
-    
+
     print("-" * 50)
-    print(f"🌍 SEISMIC SENTINEL DASHBOARD IS LIVE")
+    print("🌍 SEISMIC SENTINEL DASHBOARD IS LIVE")
     print("-" * 50)
-    print(f"✅ Server Status:  Online")
+    print("✅ Server Status:  Online")
     print(f"👉 Dashboard URL:  {url}")
     print("-" * 50)
     print("Press Ctrl+C to stop the server...")
 
     # Automatically open the web browser
     webbrowser.open(url)
-    
+
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
