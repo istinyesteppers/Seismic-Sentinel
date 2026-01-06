@@ -24,8 +24,9 @@ This project scrapes raw, unstructured data from the **Kandilli Observatory** (B
 ### 🛠️ Installation & Usage
 
 1.  **Install Dependencies:**
+    * Use this command to ensure all libraries install correctly:
     ```bash
-    pip install -r requirements.txt
+    python -m pip install -r requirements.txt
     ```
 
 2.  **Run the Pipeline (Scrape & Analyze):**
